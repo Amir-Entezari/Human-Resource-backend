@@ -10,6 +10,12 @@ class Employee(models.Model):
     phone = models.CharField( max_length=50)
     position = models.CharField(max_length=255)
     joined_at = models.DateTimeField(auto_now_add=True)
+
+class TimeTrack(models.Model):
+    employee = models.ForeignKey(Employee,on_delete=models.CASCADE)
+    entry_time = models.DateTimeField(auto_now_add=True)
+    exit_time = models.DateTimeField(auto_now_add=True)
+
 class CustomUser(AbstractUser):
     pass
     # add additional fields in here
