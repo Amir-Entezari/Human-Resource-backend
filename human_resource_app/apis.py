@@ -3,7 +3,7 @@ from django.contrib.auth import login
 from ninja import Router
 from ninja.errors import HttpError
 from .models import TimeTrack
-from .schemas import TimeTrackEntry
+from .schemas import TimeTrackIn
 
 router = Router()
 
