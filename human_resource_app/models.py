@@ -16,6 +16,11 @@ class TimeTrack(models.Model):
     entry_time = models.DateTimeField(auto_now_add=True)
     exit_time = models.DateTimeField(auto_now_add=True)
 
+class Department(models.Model):
+    department_name = models.CharField(max_length=255)
+    x_coordinate = models.FloatField()
+    y_coordinate = models.FloatField()
+
 class CustomUser(AbstractUser):
     pass
     # add additional fields in here
