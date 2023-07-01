@@ -1,6 +1,6 @@
 from ninja import ModelSchema
 from .models import TimeTrack
-class TimeTrackEntry(ModelSchema):
+class TimeTrackIn(ModelSchema):
     class Config:
         model = TimeTrack
-        model_fields = [ "employee", "checkout_time","checkout_type"]
+        model_fields = [ "employee", "checkout_time"]
