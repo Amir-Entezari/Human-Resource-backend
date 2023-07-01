@@ -18,9 +18,15 @@ class Employee(models.Model):
     department = models.ForeignKey(Department,on_delete=models.CASCADE)
 
 class TimeTrack(models.Model):
+    CHECKOUT_ENTER = 'E'
+    CHECKOUT_QUIT = 'Q'
+    CHECKOUT_CHOICES = [
+        (CHECKOUT_ENTER, 'Enter'),
+        (CHECKOUT_QUIT, 'Quit')
+    ]
     employee = models.ForeignKey(Employee,on_delete=models.CASCADE)
-    entry_time = models.DateTimeField(auto_now_add=True)
-    exit_time = models.DateTimeField(auto_now_add=True)
+    checkout_time = models.DateTimeField(auto_now_add=True)
+    checkout_type = models.CharField(max_length=1, choices=CHECKOUT_CHOICES, default=CHECKOUT_ENTER)
 
 class CustomUser(AbstractUser):
     pass
