@@ -40,7 +40,13 @@ def get_all_employees(request:HttpRequest):
     employees = Employee.objects.all()
     return employees
 
-@router.get("/employees/{personal_id}",response=list[EmployeeRetrieve],auth=django_auth)
-def get_employees(request:HttpRequest,personal_id):
-    employees = Employee.objects.filter(personal_id=personal_id)
-    return employees
+@router.get("/employees/{personal_id}",response=EmployeeRetrieve,auth=django_auth)
+def get_employee(request:HttpRequest,personal_id):
+    try:
+        employee = Employee.objects.get(personal_id=personal_id)
+        if not request.user.is_superuser : 
+            if employee.personal_id != personal_id:
+                return HttpResponse("you don't have access to this user information")
+        return employee 
+    except Employee.DoesNotExist:
+        return HttpResponse("Employee does not exist with this personal id")
