@@ -38,12 +38,9 @@ def create_employee(request:HttpRequest,payload:EmployeeCreateInOut):
 @router.get("/employees",response=list[EmployeeRetrieve])
 def get_all_employees(request:HttpRequest):
     employees = Employee.objects.all()
+    return employees
 
-    # # Fetch related User data for each employee
-    # for employee_data in serializer:
-    #     user_id = employee_data['user']['id']
-    #     user = CustomUser.objects.get(pk=user_id)
-    #     user_serializer = UserRetrieve(user)
-    #     employee_data['user'] = user_serializer.dict()
-
+@router.get("/employees/{personal_id}",response=list[EmployeeRetrieve],auth=django_auth)
+def get_employees(request:HttpRequest,personal_id):
+    employees = Employee.objects.filter(personal_id=personal_id)
     return employees
