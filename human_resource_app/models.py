@@ -36,6 +36,11 @@ class TimeTrack(models.Model):
     checkout_time = models.DateTimeField(auto_now_add=True)
     checkout_type = models.CharField(max_length=1, choices=CHECKOUT_CHOICES, default=CHECKOUT_ENTER)
 
+class WorkHour(models.Model):
+    day = models.DateField()
+    employee = models.ForeignKey(Employee,on_delete=models.CASCADE)
+    hours_worked = models.PositiveIntegerField()
+
 class CustomUser(AbstractUser):
     pass
     # add additional fields in here
