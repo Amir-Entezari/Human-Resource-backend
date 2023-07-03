@@ -12,9 +12,16 @@ class Department(models.Model):
     y_coordinate = models.FloatField()
 
 class Employee(models.Model):
+    GENDER_MAKE = 'M'
+    GENDER_FEMALE = 'F'
+    GENDER_CHOICES = [
+        (GENDER_MAKE , 'M'),
+        (GENDER_FEMALE , 'F')
+    ]
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     personal_id = models.CharField(max_length=9,validators=[MinLengthValidator(9)])
     phone = models.CharField(max_length=11,validators=[MinLengthValidator(11)])
+    gender = models.CharField(max_length=1,choices=GENDER_CHOICES)
     position = models.CharField(max_length=255)
     joined_at = models.DateTimeField(auto_now_add=True)
     department = models.ForeignKey(Department,on_delete=models.CASCADE)
