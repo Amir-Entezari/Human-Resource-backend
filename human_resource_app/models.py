@@ -33,7 +33,7 @@ class TimeTrack(models.Model):
         (CHECKOUT_QUIT, 'Quit')
     ]
     employee = models.ForeignKey(Employee,on_delete=models.CASCADE)
-    checkout_time = models.DateTimeField(auto_now_add=True)
+    checkout_time = models.DateTimeField()
     checkout_type = models.CharField(max_length=1, choices=CHECKOUT_CHOICES, default=CHECKOUT_ENTER)
 
 class WorkHour(models.Model):
