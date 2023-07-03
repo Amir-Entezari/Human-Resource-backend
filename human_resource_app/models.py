@@ -1,5 +1,5 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import RegexValidator
+from django.core.validators import MinLengthValidator
 from django.conf import settings
 from django.db import models
 
@@ -13,14 +13,7 @@ class Department(models.Model):
 
 class Employee(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    personal_id = models.IntegerField(unique=True,                                  
-                                        validators=[
-                                            RegexValidator(
-                                                regex='^[0-9]{8}$',
-                                                message='Personal ID must be an 8-digit number.',
-                                                code='invalid_personal_id'
-                                            ),]
-            )
+    personal_id = models.CharField(max_length=9,validators=[MinLengthValidator(4)])
     position = models.CharField(max_length=255)
     joined_at = models.DateTimeField(auto_now_add=True)
     department = models.ForeignKey(Department,on_delete=models.CASCADE)
