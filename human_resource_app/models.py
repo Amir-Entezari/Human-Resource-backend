@@ -13,7 +13,8 @@ class Department(models.Model):
 
 class Employee(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    personal_id = models.CharField(max_length=9,validators=[MinLengthValidator(4)])
+    personal_id = models.CharField(max_length=9,validators=[MinLengthValidator(9)])
+    phone = models.CharField(max_length=11,validators=[MinLengthValidator(11)])
     position = models.CharField(max_length=255)
     joined_at = models.DateTimeField(auto_now_add=True)
     department = models.ForeignKey(Department,on_delete=models.CASCADE)
