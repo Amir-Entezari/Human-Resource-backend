@@ -2,10 +2,11 @@ from django.http import HttpResponse, HttpRequest
 from django.contrib.auth import login
 from ninja import Router
 from ninja.errors import HttpError
+from ninja.security import django_auth
 from .models import TimeTrack, Employee, CustomUser
 from .schemas import TimeTrackIn,TimeTrackOut,EmployeeCreateInOut,EmployeeRetrieve,UserRetrieve
-from ninja.security import django_auth
-
+from .utils import calculate_work_hours
+from datetime import date
 router = Router()
 
 @router.post("/employees/TimeTrack/checkout",response=TimeTrackOut)
@@ -50,3 +51,10 @@ def get_employee(request:HttpRequest,personal_id):
         return employee 
     except Employee.DoesNotExist:
         return HttpResponse("Employee does not exist with this personal id")
+    
+
+@router.get("/employees/{personal_id}/workhour")
+def get_employee_workhour(request:HttpRequest,personal_id,start_date:date,end_date:date):
+    employee_time_track = TimeTrack.objects.filter(employee__personal_id=personal_id,checkout_time__range=[start_date, end_date])
+    total_hour = round(calculate_work_hours(employee_time_track) / 3600,ndigits=2)
+    return {"total_hour":total_hour}
