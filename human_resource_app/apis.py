@@ -3,20 +3,27 @@ from django.contrib.auth import login
 from ninja import Router
 from ninja.errors import HttpError
 from ninja.security import django_auth
-from .models import TimeTrack, Employee, CustomUser
+from .models import TimeTrack, Employee, CustomUser, WorkHour
 from .schemas import TimeTrackIn,TimeTrackOut,EmployeeCreateInOut,EmployeeRetrieve,UserRetrieve
 from .utils import calculate_work_hours
-from datetime import date
+from datetime import date,datetime
 router = Router()
 
 @router.post("/employees/TimeTrack/checkout",response=TimeTrackOut)
 def user_checkout(request: HttpRequest,payload:TimeTrackIn):
-    checkout = TimeTrack.objects.all().order_by('checkout_time').last()
+    checkout = TimeTrack.objects.filter(employee_id=payload.employee).order_by('checkout_time').last()
     new_checkout = None
     if checkout:
         if checkout.checkout_type == 'E':
             new_checkout = TimeTrack(employee_id= payload.employee, checkout_time=payload.checkout_time, checkout_type='Q')
             new_checkout.save()
+            delta_time = (new_checkout.checkout_time - checkout.checkout_time).total_seconds() / 3600
+            employee_work_hour=WorkHour.objects.filter(employee_id=payload.employee,date=payload.checkout_time.date())
+            if employee_work_hour:
+                employee_work_hour.hours_worked += delta_time
+                employee_work_hour.save()
+            else:
+                WorkHour.objects.create(employee_id=payload.employee,date=payload.checkout_time,hours_worked=delta_time)
         elif checkout.checkout_type == 'Q':
             new_checkout = TimeTrack(employee_id= payload.employee, checkout_time=payload.checkout_time, checkout_type='E')
             new_checkout.save()
