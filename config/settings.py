@@ -131,7 +131,7 @@ CELERY_TIMEZONE = 'Asia/Tehran'
 CELERY_BEAT_SCHEDULE = {
     'add': {
         'task': 'human_resource_app.tasks.add',
-        'schedule': crontab(hour=10, minute=54),
+        'schedule': crontab(hour=23, minute=59),
     }
 }
 
