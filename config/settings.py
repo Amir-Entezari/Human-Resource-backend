@@ -130,7 +130,7 @@ CELERY_BROKER_URL = 'redis://localhost:6379/1'
 CELERY_TIMEZONE = 'Asia/Tehran'
 CELERY_BEAT_SCHEDULE = {
     'add': {
-        'task': 'human_resource_app.tasks.add',
+        'task': 'human_resource_app.tasks.update_workhour_table',
         'schedule': crontab(hour=23, minute=59),
     }
 }
