@@ -18,7 +18,7 @@ def user_checkout(request: HttpRequest,payload:TimeTrackIn):
             new_checkout = TimeTrack(employee_id= payload.employee, checkout_time=payload.checkout_time, checkout_type='Q')
             new_checkout.save()
             delta_time = (new_checkout.checkout_time - checkout.checkout_time).total_seconds() / 3600
-            employee_work_hour=WorkHour.objects.filter(employee_id=payload.employee,date=payload.checkout_time.date())
+            employee_work_hour=WorkHour.objects.filter(employee_id=payload.employee,date=payload.checkout_time.date()).last()
             if employee_work_hour:
                 employee_work_hour.hours_worked += delta_time
                 employee_work_hour.save()
