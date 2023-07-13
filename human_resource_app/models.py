@@ -48,3 +48,8 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
+    
+class BlackToken(models.Model):
+    token = models.CharField(
+        verbose_name="Token to blacklist", max_length=60, null=False, blank=False
+    )
