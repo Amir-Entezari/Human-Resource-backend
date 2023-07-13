@@ -19,7 +19,19 @@ class EmployeeRetrieve(ModelSchema):
         model = Employee
         model_fields = ["user","personal_id","position","joined_at","department"]
 
-class UserRetrieve(ModelSchema):
+
+
+class LoginIn(ModelSchema):
     class Config:
         model = CustomUser
-        model_fields = ["first_name","last_name","email"]
+        model_fields = [ "username", "password"]
+
+class LogoutOut(ModelSchema):
+    class Config:
+        model = CustomUser
+        model_fields = ["username", "email", "first_name", "last_name"]
+
+class UserOut(ModelSchema):
+    class Config:
+        model = CustomUser
+        model_fields = ["username", "email", "first_name", "last_name"]
