@@ -35,13 +35,20 @@ def user_checkout(request: HttpRequest,payload:TimeTrackIn):
 
 @router.post("/employees/create",response=EmployeeCreateInOut,auth=user_auth)
 def create_employee(request:HttpRequest,payload:EmployeeCreateInOut):
-    new_employee = Employee.objects.filter(personal_id=payload.personal_id)
-    if not new_employee:
-        new_employee = Employee(user_id=payload.user,personal_id=payload.personal_id,position=payload.position,joined_at=payload.joined_at,department_id=payload.department)
-        new_employee.save()
-        return new_employee
+    if request.user.is_staff:
+        new_employee = Employee.objects.filter(personal_id=payload.personal_id)
+        if not new_employee:
+            new_employee = Employee(user_id=payload.user,
+                                    personal_id=payload.personal_id,
+                                    position=payload.position,
+                                    joined_at=payload.joined_at,
+                                    department_id=payload.department)
+            new_employee.save()
+            return new_employee
+        else:
+            return HttpError(409, f"Employee with the personal id of  already exist.")
     else:
-        return HttpResponse("Employee exists")
+        raise HttpError(403, "You can not create a employee. please login as admin.")
 
 @router.get("/employees",response=list[EmployeeRetrieve])
 def get_all_employees(request:HttpRequest):
