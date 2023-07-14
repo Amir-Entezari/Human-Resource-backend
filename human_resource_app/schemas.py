@@ -12,7 +12,7 @@ class TimeTrackOut(ModelSchema):
 class EmployeeCreateInOut(ModelSchema):
     class Config:
         model = Employee
-        model_fields = ["user","personal_id","position","joined_at","department"]
+        model_fields = ["user","personal_id","position","joined_at","department","hour_wage"]
 
 class EmployeeRetrieve(ModelSchema):
     class Config:
