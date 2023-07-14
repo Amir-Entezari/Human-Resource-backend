@@ -133,7 +133,8 @@ def get_employee(request: HttpRequest, personal_id):
                 employee__personal_id=employee.personal_id,
                 checkout_time__range=[start_date, end_date],
             )
-
+            employee_work_hour = WorkHour.objects.filter(employee=employee)
+            
             first_name = employee.user.first_name
             last_name = employee.user.first_name
             personal_id = employee.personal_id
@@ -147,6 +148,10 @@ def get_employee(request: HttpRequest, personal_id):
                 "last_name": last_name,
                 "personal_id": personal_id,
                 "time_track": list(employee_time_track),
+                "work_hours": [
+                    {"date": workhour.date, "hours_worked": workhour.hours_worked}
+                    for workhour in employee_work_hour
+                ],
                 "total_hours_worked": total_hours_worked,
                 "total_wage": employee.hour_wage * total_hours_worked,
                 "feedbacks": [
