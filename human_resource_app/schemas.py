@@ -1,5 +1,5 @@
 from ninja import ModelSchema,Schema
-from .models import TimeTrack,Employee, CustomUser
+from .models import TimeTrack,Employee, CustomUser,Feedback
 class TimeTrackIn(ModelSchema):
     class Config:
         model = TimeTrack
@@ -19,8 +19,13 @@ class EmployeeRetrieve(ModelSchema):
         model = Employee
         model_fields = ["user","personal_id","position","joined_at","department"]
 
-
-
+class EmployeeInfo(Schema):
+    first_name: str
+    last_name: str
+    personal_id:str
+    time_track:list[TimeTrackOut]
+    total_hours_worked: int
+    feedbacks: list[str]
 class LoginIn(ModelSchema):
     class Config:
         model = CustomUser
