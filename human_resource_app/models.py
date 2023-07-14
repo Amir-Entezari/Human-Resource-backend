@@ -55,5 +55,14 @@ class BlackToken(models.Model):
     )
 
 class Feedback(models.Model):
-    employee = models.ForeignKey(Employee,on_delete=models.CASCADE)
-    text = models.TextField()
+    from_user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='from_user'  # Add a related_name for the reverse accessor of from_user
+    )
+    to_user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='to_user'  # Add a related_name for the reverse accessor of to_user
+    )
+    message = models.TextField()
