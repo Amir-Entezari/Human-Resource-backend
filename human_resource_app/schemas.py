@@ -25,7 +25,7 @@ class EmployeeInfo(Schema):
     personal_id:str
     time_track:list[TimeTrackOut]
     total_hours_worked: int
-    feedbacks: list[str]
+    feedbacks: list[dict]
 class LoginIn(ModelSchema):
     class Config:
         model = CustomUser

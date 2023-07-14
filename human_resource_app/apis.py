@@ -122,7 +122,7 @@ def get_employee(request: HttpRequest, personal_id):
             total_hours_worked = round(
                 calculate_work_hours(employee_time_track) / 3600, ndigits=2
             )
-            feedbacks = Feedback.objects.filter(employee=employee).only("text")
+            feedbacks = Feedback.objects.filter(to_user=employee.user)
 
             employee_info = {
                 "first_name": first_name,
@@ -130,7 +130,7 @@ def get_employee(request: HttpRequest, personal_id):
                 "personal_id": personal_id,
                 "time_track": list(employee_time_track),
                 "total_hours_worked": total_hours_worked,
-                "feedbacks": [feedback.text for feedback in feedbacks],
+                "feedbacks": [{"from":feedback.from_user.username,"message":feedback.message} for feedback in feedbacks],
             }
 
             return employee_info
