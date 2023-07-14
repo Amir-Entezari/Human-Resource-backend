@@ -195,7 +195,10 @@ def get_employee_workhour(
 
 @router.post("/employees/TimeTrack/checkout", response=TimeTrackOut)
 def user_checkout(request: HttpRequest, payload: TimeTrackIn):
-    employee = Employee.objects.get(personal_id=payload.personal_id)
+    try:
+        employee = Employee.objects.get(personal_id=payload.personal_id)
+    except Employee.DoesNotExist:
+        raise HttpError(404, f"Employee with the personal id does not exist.")
     checkout = (
         TimeTrack.objects.filter(employee=employee)
         .order_by("checkout_time")
