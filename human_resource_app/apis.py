@@ -68,12 +68,49 @@ def create_employee(request: HttpRequest, payload: EmployeeCreateInOut):
         raise HttpError(403, "You can not create a employee. please login as admin.")
 
 
-@router.get("/employees", response=list[EmployeeRetrieve])
+@router.get("/employees")
 def get_all_employees(request: HttpRequest):
-    employees = Employee.objects.all()
+    employees = (
+        Employee.objects.select_related("user")
+        .all()
+    )
+    employees_list = []
+    for employee in employees:
+        current_date = datetime.now()
+        start_date = current_date.replace(day=1)
+        _, end_date = calendar.monthrange(current_date.year, current_date.month)
+        end_date = current_date.replace(day=end_date)
+
+        employee_time_track = TimeTrack.objects.filter(
+            employee=employee,
+            checkout_time__range=[start_date, end_date],
+        )
+        total_hours_worked = round(
+            calculate_work_hours(employee_time_track) / 3600, ndigits=2
+        )
+        employee_work_hour = WorkHour.objects.filter(employee=employee)
+        employee_info = {
+            "user_id": employee.user.id,
+            "detail": {
+                "username": employee.user.username,
+                "email": employee.user.email,
+                "first_name": employee.user.first_name,
+                "last_name": employee.user.last_name,
+                "personal_id": employee.personal_id,
+                "phone": employee.phone,
+                "gender": employee.gender,
+                "position": employee.position,
+                "joined_at": employee.joined_at,
+                "department": employee.department.department_name,
+                # "checkouts_list": list(employee_time_track),
+                "work_hours": [{"date":workhour.date,"hours_worked": workhour.hours_worked} for workhour in employee_work_hour],
+                "total_hours_worked": total_hours_worked,
+            },
+        }
+        employees_list.append(employee_info)
     if not request.user.is_superuser:
         raise HttpError(403, "You don't have access to this user information")
-    return employees
+    return employees_list
 
 
 @router.get("/employees/{personal_id}", response=EmployeeInfo, auth=user_auth)
