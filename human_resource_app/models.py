@@ -25,6 +25,7 @@ class Employee(models.Model):
     position = models.CharField(max_length=255)
     joined_at = models.DateTimeField(auto_now_add=True)
     department = models.ForeignKey(Department,on_delete=models.CASCADE)
+    hour_wage = models.FloatField()
 
 class TimeTrack(models.Model):
     CHECKOUT_ENTER = 'E'
