@@ -61,10 +61,10 @@ def get_employee(request:HttpRequest,personal_id):
         employee = Employee.objects.get(personal_id=personal_id)
         if not request.user.is_superuser : 
             if employee.personal_id != personal_id:
-                return HttpResponse("you don't have access to this user information")
+                raise HttpError(403,"You don't have access to this user information")
         return employee 
     except Employee.DoesNotExist:
-        return HttpResponse("Employee does not exist with this personal id")
+        raise HttpError(404,"Employee does not exist with this personal id")
     
 
 @router.get("/employees/{personal_id}/workhour")
