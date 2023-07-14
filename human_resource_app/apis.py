@@ -83,6 +83,8 @@ def get_all_employees(request: HttpRequest):
             employee=employee,
             checkout_time__range=[start_date, end_date],
         )
+        if not employee_time_track:
+            continue
         total_hours_worked = round(
             calculate_work_hours(employee_time_track) / 3600, ndigits=2
         )
