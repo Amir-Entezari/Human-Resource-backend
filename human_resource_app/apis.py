@@ -21,53 +21,31 @@ import calendar
 router = Router()
 
 
-@router.post("/employees/TimeTrack/checkout", response=TimeTrackOut)
-def user_checkout(request: HttpRequest, payload: TimeTrackIn):
-    checkout = (
-        TimeTrack.objects.filter(employee_id=payload.employee)
-        .order_by("checkout_time")
-        .last()
-    )
-    new_checkout = None
-    if checkout:
-        if checkout.checkout_type == "E":
-            new_checkout = TimeTrack(
-                employee_id=payload.employee,
-                checkout_time=payload.checkout_time,
-                checkout_type="Q",
-            )
-            new_checkout.save()
-            delta_time = (
-                new_checkout.checkout_time - checkout.checkout_time
-            ).total_seconds() / 3600
-            employee_work_hour = WorkHour.objects.filter(
-                employee_id=payload.employee, date=payload.checkout_time.date()
-            ).last()
-            if employee_work_hour:
-                employee_work_hour.hours_worked += delta_time
-                employee_work_hour.save()
-            else:
-                WorkHour.objects.create(
-                    employee_id=payload.employee,
-                    date=payload.checkout_time,
-                    hours_worked=delta_time,
-                )
-        elif checkout.checkout_type == "Q":
-            new_checkout = TimeTrack(
-                employee_id=payload.employee,
-                checkout_time=payload.checkout_time,
-                checkout_type="E",
-            )
-            new_checkout.save()
+@router.get("/user", response=UserOut, auth=user_auth)
+def fetch_user(request: HttpRequest):
+    if request.auth.is_authenticated:
+        return request.auth
     else:
-        new_checkout = TimeTrack(
-            employee_id=payload.employee,
-            checkout_time=payload.checkout_time,
-            checkout_type="E",
-        )
-        new_checkout.save()
+        raise HttpError(401, "User not authenticated")
 
-    return new_checkout
+
+@router.post("user/login")
+def user_login(request: HttpRequest, payload: LoginIn) -> HttpResponse:
+    try:
+        user = CustomUser.objects.get(username=payload.username)
+        if user.check_password(payload.password):
+            login(request, user)
+            return HttpResponse(generate_token(user), status=200)
+        else:
+            return HttpResponse("Wrong username or password", status=401)
+    except CustomUser.DoesNotExist:
+        return HttpResponse("Wrong username or password", status=401)
+
+
+@router.post("user/logout", auth=user_auth)
+def user_logout(request):
+    logout(request)
+    blacklist_token(request.headers.get("Authorization"))
 
 
 @router.post("/employees/create", response=EmployeeCreateInOut, auth=user_auth)
@@ -160,46 +138,68 @@ def get_employee_workhour(
         if not employee_time_track:
             return {"Error": "No record was found in this date"}
         total_hour = round(calculate_work_hours(employee_time_track) / 3600, ndigits=2)
-        return {"total_hour": total_hour,"payment":total_hour*100000}
+        return {"total_hour": total_hour, "payment": total_hour * 100000}
     else:
         raise HttpError(403, "You don't have access to this user information")
 
 
-@router.get("/user", response=UserOut, auth=user_auth)
-def fetch_user(request: HttpRequest):
-    if request.auth.is_authenticated:
-        return request.auth
+@router.post("/employees/TimeTrack/checkout", response=TimeTrackOut)
+def user_checkout(request: HttpRequest, payload: TimeTrackIn):
+    checkout = (
+        TimeTrack.objects.filter(employee_id=payload.employee)
+        .order_by("checkout_time")
+        .last()
+    )
+    new_checkout = None
+    if checkout:
+        if checkout.checkout_type == "E":
+            new_checkout = TimeTrack(
+                employee_id=payload.employee,
+                checkout_time=payload.checkout_time,
+                checkout_type="Q",
+            )
+            new_checkout.save()
+            delta_time = (
+                new_checkout.checkout_time - checkout.checkout_time
+            ).total_seconds() / 3600
+            employee_work_hour = WorkHour.objects.filter(
+                employee_id=payload.employee, date=payload.checkout_time.date()
+            ).last()
+            if employee_work_hour:
+                employee_work_hour.hours_worked += delta_time
+                employee_work_hour.save()
+            else:
+                WorkHour.objects.create(
+                    employee_id=payload.employee,
+                    date=payload.checkout_time,
+                    hours_worked=delta_time,
+                )
+        elif checkout.checkout_type == "Q":
+            new_checkout = TimeTrack(
+                employee_id=payload.employee,
+                checkout_time=payload.checkout_time,
+                checkout_type="E",
+            )
+            new_checkout.save()
     else:
-        raise HttpError(401, "User not authenticated")
+        new_checkout = TimeTrack(
+            employee_id=payload.employee,
+            checkout_time=payload.checkout_time,
+            checkout_type="E",
+        )
+        new_checkout.save()
 
-
-@router.post("user/login")
-def user_login(request: HttpRequest, payload: LoginIn) -> HttpResponse:
-    try:
-        user = CustomUser.objects.get(username=payload.username)
-        if user.check_password(payload.password):
-            login(request, user)
-            return HttpResponse(generate_token(user), status=200)
-        else:
-            return HttpResponse("Wrong username or password", status=401)
-    except CustomUser.DoesNotExist:
-        return HttpResponse("Wrong username or password", status=401)
-
-
-@router.post("user/logout", auth=user_auth)
-def user_logout(request):
-    logout(request)
-    blacklist_token(request.headers.get("Authorization"))
+    return new_checkout
 
 
 @router.post("feedback/send", auth=user_auth)
-def send_feedback(request: HttpRequest, payload:FeedbackIn):
+def send_feedback(request: HttpRequest, payload: FeedbackIn):
     try:
         to_user = CustomUser.objects.get(id=payload.to_user)
         new_feedback = Feedback.objects.create(
             from_user_id=request.user.id, to_user=to_user, message=payload.message
         )
         new_feedback.save()
-        return HttpResponse("Feedback successfully sent",status=200)
+        return HttpResponse("Feedback successfully sent", status=200)
     except CustomUser.DoesNotExist:
         raise HttpError(404, "User does not exist")
