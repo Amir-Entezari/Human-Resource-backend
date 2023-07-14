@@ -11,6 +11,7 @@ from .schemas import (
     UserOut,
     LoginIn,
     EmployeeInfo,
+    FeedbackIn,
 )
 from .utils import calculate_work_hours
 from .auth import user_auth, blacklist_token, generate_token
@@ -130,7 +131,10 @@ def get_employee(request: HttpRequest, personal_id):
                 "personal_id": personal_id,
                 "time_track": list(employee_time_track),
                 "total_hours_worked": total_hours_worked,
-                "feedbacks": [{"from":feedback.from_user.username,"message":feedback.message} for feedback in feedbacks],
+                "feedbacks": [
+                    {"from": feedback.from_user.username, "message": feedback.message}
+                    for feedback in feedbacks
+                ],
             }
 
             return employee_info
@@ -185,3 +189,16 @@ def user_login(request: HttpRequest, payload: LoginIn) -> HttpResponse:
 def user_logout(request):
     logout(request)
     blacklist_token(request.headers.get("Authorization"))
+
+
+@router.post("feedback/send", auth=user_auth)
+def send_feedback(request: HttpRequest, payload:FeedbackIn):
+    try:
+        to_user = CustomUser.objects.get(id=payload.to_user)
+        new_feedback = Feedback.objects.create(
+            from_user_id=request.user.id, to_user=to_user, message=payload.message
+        )
+        new_feedback.save()
+        return HttpResponse("Feedback successfully sent",status=200)
+    except CustomUser.DoesNotExist:
+        raise HttpError(404, "User does not exist")

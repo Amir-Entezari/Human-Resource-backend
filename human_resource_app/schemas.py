@@ -40,3 +40,8 @@ class UserOut(ModelSchema):
     class Config:
         model = CustomUser
         model_fields = ["username", "email", "first_name", "last_name"]
+
+class FeedbackIn(ModelSchema):
+    class Config:
+        model = Feedback
+        model_fields = ["to_user","message"]
