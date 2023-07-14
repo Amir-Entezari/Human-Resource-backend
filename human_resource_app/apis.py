@@ -59,6 +59,7 @@ def create_employee(request: HttpRequest, payload: EmployeeCreateInOut):
                 position=payload.position,
                 joined_at=payload.joined_at,
                 department_id=payload.department,
+                hour_wage=payload.hour_wage,
             )
             new_employee.save()
             return new_employee
@@ -70,10 +71,7 @@ def create_employee(request: HttpRequest, payload: EmployeeCreateInOut):
 
 @router.get("/employees")
 def get_all_employees(request: HttpRequest):
-    employees = (
-        Employee.objects.select_related("user")
-        .all()
-    )
+    employees = Employee.objects.select_related("user").all()
     employees_list = []
     for employee in employees:
         current_date = datetime.now()
@@ -103,8 +101,12 @@ def get_all_employees(request: HttpRequest):
                 "joined_at": employee.joined_at,
                 "department": employee.department.department_name,
                 # "checkouts_list": list(employee_time_track),
-                "work_hours": [{"date":workhour.date,"hours_worked": workhour.hours_worked} for workhour in employee_work_hour],
+                "work_hours": [
+                    {"date": workhour.date, "hours_worked": workhour.hours_worked}
+                    for workhour in employee_work_hour
+                ],
                 "total_hours_worked": total_hours_worked,
+                "total_wage": total_hours_worked * employee.hour_wage,
             },
         }
         employees_list.append(employee_info)
@@ -146,6 +148,7 @@ def get_employee(request: HttpRequest, personal_id):
                 "personal_id": personal_id,
                 "time_track": list(employee_time_track),
                 "total_hours_worked": total_hours_worked,
+                "total_wage": employee.hour_wage * total_hours_worked,
                 "feedbacks": [
                     {"from": feedback.from_user.username, "message": feedback.message}
                     for feedback in feedbacks
@@ -168,14 +171,15 @@ def get_employee_workhour(
         or Employee.objects.get(user_id=request.user.id).personal_id == personal_id
         or request.user.is_superuser
     ):
+        employee = Employee.objects.get(personal_id=personal_id)
         employee_time_track = TimeTrack.objects.filter(
-            employee__personal_id=personal_id,
+            employee=employee,
             checkout_time__range=[start_date, end_date],
         )
         if not employee_time_track:
             return {"Error": "No record was found in this date"}
         total_hour = round(calculate_work_hours(employee_time_track) / 3600, ndigits=2)
-        return {"total_hour": total_hour, "payment": total_hour * 100000}
+        return {"total_hour": total_hour, "total_wage": total_hour * employee.hour_wage}
     else:
         raise HttpError(403, "You don't have access to this user information")
 
