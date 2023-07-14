@@ -1,5 +1,5 @@
 from django.http import HttpResponse, HttpRequest
-from django.contrib.auth import login
+from django.contrib.auth import login,logout
 from ninja import Router
 from ninja.errors import HttpError
 from .models import TimeTrack, Employee, CustomUser, WorkHour
@@ -53,7 +53,9 @@ def create_employee(request:HttpRequest,payload:EmployeeCreateInOut):
 @router.get("/employees",response=list[EmployeeRetrieve])
 def get_all_employees(request:HttpRequest):
     employees = Employee.objects.all()
-    return employees
+    if not request.user.is_superuser : 
+        raise HttpError(403,"You don't have access to this user information")
+    return employees 
 
 @router.get("/employees/{personal_id}",response=EmployeeRetrieve,auth=user_auth)
 def get_employee(request:HttpRequest,personal_id):
@@ -97,4 +99,5 @@ def user_login(request: HttpRequest, payload:LoginIn) -> HttpResponse:
     
 @router.post("user/logout", auth=user_auth)
 def user_logout(request):
+    logout(request)
     blacklist_token(request.headers.get("Authorization"))
