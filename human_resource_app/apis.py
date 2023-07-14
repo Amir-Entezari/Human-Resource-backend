@@ -1,5 +1,6 @@
 from django.http import HttpResponse, HttpRequest
 from django.contrib.auth import login, logout
+from django.shortcuts import get_object_or_404
 from ninja import Router
 from ninja.errors import HttpError
 from .models import TimeTrack, Employee, CustomUser, WorkHour, Feedback
@@ -177,10 +178,10 @@ def get_employee_workhour(
 ):
     if (
         personal_id == "me"
-        or Employee.objects.get(user_id=request.user.id).personal_id == personal_id
+        or get_object_or_404(Employee,user_id=request.user.id).personal_id == personal_id
         or request.user.is_superuser
     ):
-        employee = Employee.objects.get(personal_id=personal_id)
+        employee = get_object_or_404(Employee,personal_id=personal_id)
         employee_time_track = TimeTrack.objects.filter(
             employee=employee,
             checkout_time__range=[start_date, end_date],
