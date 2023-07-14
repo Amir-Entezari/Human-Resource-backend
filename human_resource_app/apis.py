@@ -51,18 +51,21 @@ def user_logout(request):
 
 @router.post("/employees/create", response=EmployeeCreateInOut, auth=user_auth)
 def create_employee(request: HttpRequest, payload: EmployeeCreateInOut):
-    if request.user.is_staff:
+    if request.user.is_superuser:
         new_employee = Employee.objects.filter(personal_id=payload.personal_id)
         if not new_employee:
-            new_employee = Employee(
-                user_id=payload.user,
-                personal_id=payload.personal_id,
-                position=payload.position,
-                joined_at=payload.joined_at,
-                department_id=payload.department,
-                hour_wage=payload.hour_wage,
-            )
-            new_employee.save()
+            try:
+                new_employee = Employee(
+                    user_id=payload.user,
+                    personal_id=payload.personal_id,
+                    position=payload.position,
+                    joined_at=payload.joined_at,
+                    department_id=payload.department,
+                    hour_wage=payload.hour_wage,
+                )
+                new_employee.save()
+            except:
+                raise HttpError(400, "Please enter values correctly.")
             return new_employee
         else:
             return HttpError(409, f"Employee with the personal id of  already exist.")
