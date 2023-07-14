@@ -135,6 +135,8 @@ def get_employee(request: HttpRequest, personal_id):
                 employee__personal_id=employee.personal_id,
                 checkout_time__range=[start_date, end_date],
             )
+            if not employee_time_track:
+                raise HttpError (404, "No record was found in this date")
             employee_work_hour = WorkHour.objects.filter(employee=employee)
             
             first_name = employee.user.first_name
