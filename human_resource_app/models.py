@@ -53,3 +53,7 @@ class BlackToken(models.Model):
     token = models.CharField(
         verbose_name="Token to blacklist", max_length=60, null=False, blank=False
     )
+
+class Feedback(models.Model):
+    employee = models.ForeignKey(Employee,on_delete=models.CASCADE)
+    text = models.TextField()
