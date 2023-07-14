@@ -10,8 +10,6 @@ from datetime import datetime
 
 
 def calculate_work_hours(queryset: TimeTrack):
-    initial_time = datetime(year=2000, month=1, day=1, tzinfo=queryset[0].checkout_time.tzinfo)
-    # initial_time = initial_time.replace(tzinfo=queryset[0].checkout_time.tzinfo)
     enters = []
     exits = []
     for checkout in queryset:
@@ -21,9 +19,9 @@ def calculate_work_hours(queryset: TimeTrack):
             exits.append(checkout)
     enters.sort(key=lambda x: x.checkout_time)
     exits.sort(key=lambda x: x.checkout_time)
-
+    print(len(enters),len(exits))
     total_work_hours = 0
-    for i, checkout in enumerate(enters):
+    for i, checkout in enumerate(enters if len(enters)<len(exits) else exits):
         delta_time = exits[i].checkout_time - enters[i].checkout_time
         total_work_hours += delta_time.total_seconds()
         # WorkHour.objects.create(
