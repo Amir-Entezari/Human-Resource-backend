@@ -184,7 +184,7 @@ def get_employee_workhour(
             checkout_time__range=[start_date, end_date],
         )
         if not employee_time_track:
-            raise HttpError (404, "No record was found in this date"})
+            raise HttpError (404, "No record was found in this date")
         total_hour = round(calculate_work_hours(employee_time_track) / 3600, ndigits=2)
         return {"total_hour": total_hour, "total_wage": total_hour * employee.hour_wage}
     else:
