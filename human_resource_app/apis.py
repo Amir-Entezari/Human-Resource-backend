@@ -149,8 +149,9 @@ def get_employee_workhour(
     request: HttpRequest, personal_id, start_date: date, end_date: date
 ):
     if (
-        request.user.is_superuser
+        personal_id == "me"
         or Employee.objects.get(user_id=request.user.id).personal_id == personal_id
+        or request.user.is_superuser
     ):
         employee_time_track = TimeTrack.objects.filter(
             employee__personal_id=personal_id,
@@ -159,7 +160,7 @@ def get_employee_workhour(
         if not employee_time_track:
             return {"Error": "No record was found in this date"}
         total_hour = round(calculate_work_hours(employee_time_track) / 3600, ndigits=2)
-        return {"total_hour": total_hour}
+        return {"total_hour": total_hour,"payment":total_hour*100000}
     else:
         raise HttpError(403, "You don't have access to this user information")
 
