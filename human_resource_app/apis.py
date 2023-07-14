@@ -59,15 +59,14 @@ def get_all_employees(request:HttpRequest):
 
 @router.get("/employees/{personal_id}",response=EmployeeRetrieve,auth=user_auth)
 def get_employee(request:HttpRequest,personal_id):
-    try:
-        employee = Employee.objects.get(personal_id=personal_id)
-        if not request.user.is_superuser : 
-            if employee.personal_id != personal_id:
-                raise HttpError(403,"You don't have access to this user information")
-        return employee 
-    except Employee.DoesNotExist:
-        raise HttpError(404,"Employee does not exist with this personal id")
-    
+    if request.user.is_superuser or Employee.objects.get(user_id=request.user.id).personal_id == personal_id:
+        try:
+            employee = Employee.objects.get(personal_id=personal_id)
+            return employee
+        except Employee.DoesNotExist:
+            raise HttpError(404,"Employee does not exist with this personal id")
+    else:
+            raise HttpError(403,"You don't have access to this user information") 
 
 @router.get("/employees/{personal_id}/workhour")
 def get_employee_workhour(request:HttpRequest,personal_id,start_date:date,end_date:date):
