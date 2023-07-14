@@ -195,8 +195,9 @@ def get_employee_workhour(
 
 @router.post("/employees/TimeTrack/checkout", response=TimeTrackOut)
 def user_checkout(request: HttpRequest, payload: TimeTrackIn):
+    employee = Employee.objects.get(personal_id=payload.personal_id)
     checkout = (
-        TimeTrack.objects.filter(employee_id=payload.employee)
+        TimeTrack.objects.filter(employee=employee)
         .order_by("checkout_time")
         .last()
     )
@@ -204,7 +205,7 @@ def user_checkout(request: HttpRequest, payload: TimeTrackIn):
     if checkout:
         if checkout.checkout_type == "E":
             new_checkout = TimeTrack(
-                employee_id=payload.employee,
+                employee=employee,
                 checkout_time=payload.checkout_time,
                 checkout_type="Q",
             )
@@ -213,27 +214,27 @@ def user_checkout(request: HttpRequest, payload: TimeTrackIn):
                 new_checkout.checkout_time - checkout.checkout_time
             ).total_seconds() / 3600
             employee_work_hour = WorkHour.objects.filter(
-                employee_id=payload.employee, date=payload.checkout_time.date()
+                employee=employee, date=payload.checkout_time.date()
             ).last()
             if employee_work_hour:
                 employee_work_hour.hours_worked += delta_time
                 employee_work_hour.save()
             else:
                 WorkHour.objects.create(
-                    employee_id=payload.employee,
+                    employee=employee,
                     date=payload.checkout_time,
                     hours_worked=delta_time,
                 )
         elif checkout.checkout_type == "Q":
             new_checkout = TimeTrack(
-                employee_id=payload.employee,
+                employee=employee,
                 checkout_time=payload.checkout_time,
                 checkout_type="E",
             )
             new_checkout.save()
     else:
         new_checkout = TimeTrack(
-            employee_id=payload.employee,
+            employee=employee,
             checkout_time=payload.checkout_time,
             checkout_type="E",
         )
