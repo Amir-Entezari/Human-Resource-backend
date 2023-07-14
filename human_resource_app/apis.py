@@ -68,14 +68,16 @@ def get_employee(request:HttpRequest,personal_id):
     else:
             raise HttpError(403,"You don't have access to this user information") 
 
-@router.get("/employees/{personal_id}/workhour")
+@router.get("/employees/{personal_id}/workhour",auth=user_auth)
 def get_employee_workhour(request:HttpRequest,personal_id,start_date:date,end_date:date):
-    employee_time_track = TimeTrack.objects.filter(employee__personal_id=personal_id,checkout_time__range=[start_date, end_date])
-    if not employee_time_track:
-        return {"Error": "No record was found in this date"}
-    total_hour = round(calculate_work_hours(employee_time_track) / 3600,ndigits=2)
-    return {"total_hour":total_hour}
-
+    if request.user.is_superuser or Employee.objects.get(user_id=request.user.id).personal_id == personal_id:
+        employee_time_track = TimeTrack.objects.filter(employee__personal_id=personal_id,checkout_time__range=[start_date, end_date])
+        if not employee_time_track:
+            return {"Error": "No record was found in this date"}
+        total_hour = round(calculate_work_hours(employee_time_track) / 3600,ndigits=2)
+        return {"total_hour":total_hour}
+    else:
+            raise HttpError(403,"You don't have access to this user information") 
 
 @router.get("/user", response=UserOut, auth=user_auth)
 def fetch_user(request: HttpRequest):
