@@ -1,5 +1,5 @@
 # Use an official Python runtime as the base image
-FROM python:3.9
+FROM python:3.10-slim-buster
 
 # Install Redis server
 RUN apt-get update && apt-get install -y redis-server
@@ -9,6 +9,11 @@ WORKDIR /app
 
 # Copy the requirements file and install dependencies
 COPY requirements.txt .
+
+
+RUN apt-get install build-essential libssl-dev libffi-dev python3-dev -y
+RUN pip install setuptools wheel
+RUN pip install pycryptodome
 
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -22,4 +27,4 @@ EXPOSE 6379
 # Specify the command to run Django project
 # CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 # Run Redis server
-CMD redis-server --daemonize yes && python manage.py runserver 0.0.0.0:8000
+CMD redis-server --daemonize yes && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000
