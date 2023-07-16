@@ -16,7 +16,7 @@ from .schemas import (
 )
 from .utils import calculate_work_hours
 from .auth import user_auth, blacklist_token, generate_token
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 import calendar
 
 router = Router()
@@ -185,7 +185,7 @@ def get_employee_workhour(
         or get_object_or_404(Employee,user_id=request.user.id).personal_id == personal_id
         or request.user.is_superuser
     ):
-        employee = get_object_or_404(Employee,personal_id=personal_id)
+        employee = get_object_or_404(Employee,user_id=request.user.id)
         employee_time_track = TimeTrack.objects.filter(
             employee=employee,
             checkout_time__range=[start_date, end_date],
@@ -214,36 +214,43 @@ def user_checkout(request: HttpRequest, payload: TimeTrackIn):
         if checkout.checkout_type == "E":
             new_checkout = TimeTrack(
                 employee=employee,
-                checkout_time=payload.checkout_time,
+                checkout_time=datetime.now(),
                 checkout_type="Q",
             )
-            new_checkout.save()
             delta_time = (
-                new_checkout.checkout_time - checkout.checkout_time
-            ).total_seconds() / 3600
+                new_checkout.checkout_time - checkout.checkout_time.astimezone(tz=None).replace(tzinfo=None)
+            ).total_seconds() 
+            if delta_time < 60:
+                return HttpResponse("Delta Time is less than 1 minute",status=200)
+            new_checkout.save()
             employee_work_hour = WorkHour.objects.filter(
-                employee=employee, date=payload.checkout_time.date()
+                employee=employee, date=datetime.now().date()
             ).last()
             if employee_work_hour:
-                employee_work_hour.hours_worked += delta_time
+                employee_work_hour.hours_worked += delta_time / 3600
                 employee_work_hour.save()
             else:
                 WorkHour.objects.create(
                     employee=employee,
-                    date=payload.checkout_time,
-                    hours_worked=delta_time,
+                    date=datetime.now(),
+                    hours_worked=delta_time / 3600,
                 )
         elif checkout.checkout_type == "Q":
             new_checkout = TimeTrack(
                 employee=employee,
-                checkout_time=payload.checkout_time,
+                checkout_time=datetime.now(),
                 checkout_type="E",
             )
+            delta_time = (
+                new_checkout.checkout_time - checkout.checkout_time.astimezone(tz=None).replace(tzinfo=None)
+            ).total_seconds() 
+            if delta_time < 60:
+                return HttpResponse("Delta Time is less than 1 minute",status=200)
             new_checkout.save()
     else:
         new_checkout = TimeTrack(
             employee=employee,
-            checkout_time=payload.checkout_time,
+            checkout_time=datetime.now(),
             checkout_type="E",
         )
         new_checkout.save()
