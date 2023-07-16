@@ -1,10 +1,7 @@
 from ninja import ModelSchema,Schema
 from .models import TimeTrack,Employee, CustomUser,Feedback
-class TimeTrackIn(ModelSchema):
+class TimeTrackIn(Schema):
     personal_id : str
-    class Config:
-        model = TimeTrack
-        model_fields = [ "checkout_time"]
 class TimeTrackOut(ModelSchema):
     class Config:
         model = TimeTrack
