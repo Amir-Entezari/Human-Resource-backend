@@ -51,7 +51,7 @@ def user_logout(request):
 
 @router.post("/employees/create", response=EmployeeCreateInOut, auth=user_auth)
 def create_employee(request: HttpRequest, payload: EmployeeCreateInOut):
-    if request.user.is_superuser:
+    if request.auth.is_superuser:
         new_employee = Employee.objects.filter(personal_id=payload.personal_id)
         if not new_employee:
             try:
@@ -116,7 +116,7 @@ def get_all_employees(request: HttpRequest):
             },
         }
         employees_list.append(employee_info)
-    if not request.user.is_superuser:
+    if not request.auth.is_superuser:
         raise HttpError(403, "You don't have access to this user information")
     return employees_list
 
@@ -125,11 +125,12 @@ def get_all_employees(request: HttpRequest):
 def get_employee(request: HttpRequest, personal_id):
     if (
         personal_id == "me"
-        or Employee.objects.get(user_id=request.user.id).personal_id == personal_id
-        or request.user.is_superuser
+        or Employee.objects.get(user=request.auth).personal_id == personal_id
+        or request.auth.is_superuser
     ):
         try:
-            employee = Employee.objects.get(user_id=request.user.id)
+            # print("*******",(request.auth.is_superuser))
+            employee = Employee.objects.get(user=request.auth)
             current_date = datetime.now()
             start_date = current_date.replace(day=1)
             _, end_date = calendar.monthrange(current_date.year, current_date.month)
@@ -182,10 +183,10 @@ def get_employee_workhour(
 ):
     if (
         personal_id == "me"
-        or get_object_or_404(Employee,user_id=request.user.id).personal_id == personal_id
-        or request.user.is_superuser
+        or get_object_or_404(Employee,user=request.auth).personal_id == personal_id
+        or request.auth.is_superuser
     ):
-        employee = get_object_or_404(Employee,user_id=request.user.id)
+        employee = get_object_or_404(Employee,user=request.auth)
         employee_time_track = TimeTrack.objects.filter(
             employee=employee,
             checkout_time__range=[start_date, end_date],
@@ -263,7 +264,7 @@ def send_feedback(request: HttpRequest, payload: FeedbackIn):
     try:
         to_user = CustomUser.objects.get(id=payload.to_user)
         new_feedback = Feedback.objects.create(
-            from_user_id=request.user.id, to_user=to_user, message=payload.message
+            from_user=request.auth, to_user=to_user, message=payload.message
         )
         new_feedback.save()
         return HttpResponse("Feedback successfully sent", status=200)
