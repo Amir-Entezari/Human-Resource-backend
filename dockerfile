@@ -27,4 +27,8 @@ EXPOSE 6379
 # Specify the command to run Django project
 # CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 # Run Redis server
-CMD redis-server --daemonize yes && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000
+RUN python manage.py makemigrations
+RUN python manage.py migrate
+# RUN python manage.py runserver 0.0.0.0:8000
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# CMD redis-server --daemonize yes && python manage.py makemigrations && python manage.py migrate && python manage.py runserver

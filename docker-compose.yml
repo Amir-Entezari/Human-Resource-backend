@@ -4,11 +4,15 @@ services:
   web:
     build: .
     ports:
-      - "8000:8000"
-    depends_on:
-      - redis
-    container_name: human-resource-backend
-  redis:
-    image: redis:latest
-    ports:
-      - "6379:6379"
+      - "0.0.0.0:8000:8000"
+    command: sh -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    # depends_on:
+    #   - redis
+    image: human-resource-backend
+
+    labels:
+      - traefik.http.routers.my-container.rule=Host(`amirentezari.ir`)
+  # redis:
+  #   image: redis:latest
+  #   ports:
+  #     - "6379:6379"
