@@ -73,8 +73,10 @@ def create_employee(request: HttpRequest, payload: EmployeeCreateInOut):
         raise HttpError(403, "You can not create a employee. please login as admin.")
 
 
-@router.get("/employees")
+@router.get("/employees", auth=user_auth)
 def get_all_employees(request: HttpRequest):
+    if not request.auth.is_superuser:
+        raise HttpError(403, "You don't have access to this user information")
     employees = Employee.objects.select_related("user").all()
     employees_list = []
     for employee in employees:
@@ -116,8 +118,7 @@ def get_all_employees(request: HttpRequest):
             },
         }
         employees_list.append(employee_info)
-    if not request.auth.is_superuser:
-        raise HttpError(403, "You don't have access to this user information")
+    print(request.auth)
     return employees_list
 
 
