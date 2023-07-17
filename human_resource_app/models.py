@@ -70,3 +70,10 @@ class Feedback(models.Model):
         related_name='to_user'  # Add a related_name for the reverse accessor of to_user
     )
     message = models.TextField()
+
+class Device(models.Model):
+    device_name = models.CharField(max_length=255)
+    ip_address = models.CharField(max_length=255)
+    department = models.ForeignKey(Department,on_delete=models.CASCADE)
+    def __str__(self):
+        return self.device_name
