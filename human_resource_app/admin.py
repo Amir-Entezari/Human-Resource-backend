@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import CustomUser,Employee,Department,TimeTrack,Feedback
+from .models import CustomUser,Employee,Department,TimeTrack,Feedback,Device,WorkHour
 # Register your models here.
 @admin.register(CustomUser)
 class UserAdmin(BaseUserAdmin):
@@ -17,3 +17,5 @@ admin.site.register(Employee)
 admin.site.register(Department)
 admin.site.register(TimeTrack)
 admin.site.register(Feedback)
+admin.site.register(Device)
+admin.site.register(WorkHour)
