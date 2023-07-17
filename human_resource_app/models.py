@@ -45,6 +45,8 @@ class WorkHour(models.Model):
     date = models.DateField()
     employee = models.ForeignKey(Employee,on_delete=models.CASCADE)
     hours_worked = models.FloatField()
+    def __str__(self):
+        return self.date
 
 class CustomUser(AbstractUser):
     pass
