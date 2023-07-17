@@ -10,6 +10,8 @@ class Department(models.Model):
     department_name = models.CharField(max_length=255)
     x_coordinate = models.FloatField()
     y_coordinate = models.FloatField()
+    def __str__(self):
+        return self.department_name
 
 class Employee(models.Model):
     GENDER_MAKE = 'M'
@@ -26,7 +28,8 @@ class Employee(models.Model):
     joined_at = models.DateTimeField(auto_now_add=True)
     department = models.ForeignKey(Department,on_delete=models.CASCADE)
     hour_wage = models.FloatField()
-
+    def __str__(self):
+        return self.user.username
 class TimeTrack(models.Model):
     CHECKOUT_ENTER = 'E'
     CHECKOUT_QUIT = 'Q'
