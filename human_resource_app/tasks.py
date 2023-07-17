@@ -16,5 +16,5 @@ def update_workhour_table():
                         employee_work_hour.hours_worked += delta_time
                         employee_work_hour.save()
                     else:
-                        WorkHour.objects.create(employee_id=checkout.employee,date=checkout.checkout_time,hours_worked=delta_time)
+                        WorkHour.objects.create(employee=checkout.employee,date=checkout.checkout_time,hours_worked=delta_time)
 
