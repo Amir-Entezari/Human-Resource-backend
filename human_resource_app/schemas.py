@@ -24,6 +24,7 @@ class EmployeeInfo(Schema):
     time_track:list[TimeTrackOut]
     work_hours:list[dict]
     total_hours_worked: int
+    total_wage: float
     feedbacks: list[dict]
 class LoginIn(ModelSchema):
     class Config:
